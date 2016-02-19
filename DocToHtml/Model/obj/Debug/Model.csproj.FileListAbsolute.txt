@@ -1,0 +1,8 @@
+E:\搜才项目源码\Doc\Model\bin\Debug\Model.dll.config
+E:\搜才项目源码\Doc\Model\bin\Debug\Model.dll
+E:\搜才项目源码\Doc\Model\bin\Debug\Model.pdb
+E:\搜才项目源码\Doc\Model\bin\Debug\EntityFramework.dll
+E:\搜才项目源码\Doc\Model\bin\Debug\EntityFramework.xml
+E:\搜才项目源码\Doc\Model\bin\Debug\zh-Hans\EntityFramework.resources.dll
+E:\搜才项目源码\Doc\Model\obj\Debug\Model.dll
+E:\搜才项目源码\Doc\Model\obj\Debug\Model.pdb

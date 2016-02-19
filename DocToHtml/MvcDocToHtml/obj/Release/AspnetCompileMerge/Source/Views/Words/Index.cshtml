@@ -1,0 +1,260 @@
+﻿@*@model List<Model.UploadFile1>*@
+@model Webdiyer.WebControls.Mvc.PagedList<MvcDocToHtml.Controllers.WordsController.word>
+@{
+    ViewBag.Title = "Index";
+
+}
+<script src="~/Scripts/jquery-1.10.2.min.js"></script>
+<link href="~/Scripts/dialog/css/ui-dialog.css" rel="stylesheet" />
+<script src="~/Scripts/jquery.form.js"></script>
+<script src="~/Scripts/dialog/dist/dialog-plus.js"></script>
+<script src="~/Scripts/Common.js"></script>
+<style type="text/css">
+    input {
+        vertical-align: middle;
+        margin: 0;
+        padding: 0;
+    }
+    .file-box {
+        position: relative;
+        width: 540px;
+    }
+    .txt {
+        height: 30px;
+        border: 1px solid #cdcdcd;
+        width: 180px;
+    }
+    .file {
+        position: absolute;
+        top: 0;
+        right: 120px;
+        height: 30px;
+        filter: alpha(opacity:0);
+        opacity: 0;
+        width: 240px;
+    }
+</style>
+<div class="row">
+    <div class="col-md-3">
+        @Html.Partial("../Shared/_QuickMenu")
+    </div>
+    <div class="col-md-9 ">
+        <ol class="breadcrumb">
+            <li><a href="#">附件管理</a></li>
+            <li class="active">查看Word列表</li>
+        </ol>
+        <form id="form1" action="/Words/AddFile" enctype="multipart/form-data">
+            <div class="file-box">
+                选择简历模板
+                <select id="tep" name="wtep">
+                    <option value="1" selected>搜才模板</option>
+                    <option value="2">智联模板</option>
+                </select>
+                <input type='text' name='textfield' id='textfield' class='txt' />
+                <input type="button" value="浏览..." class='btn btn-primary' style="height:30px"  />
+                <input type="file" name="file" class="file" id="file" size="28" onchange="document.getElementById('textfield').value=this.value" />
+                <input type="button" class="btn btn-danger" id="btnOk" value="上传" style="height:30px" onclick="Check()" />
+                <input type="submit" id="btnHiddenOk" value="上传" style="display:none" />
+             
+            </div>
+            @*<div>
+                <table>
+                    <tr>
+
+                        <td>
+                            选择简历模板
+                            <select id="tep" name="wtep">
+                                <option value="1" selected>搜才模板</option>
+                                <option value="2">智联模板</option>
+                            </select>
+                        </td>
+                        <td><input type="file" id="file" name="file" /></td>
+                        <td><input id="btnOk" class="btn btn-danger" value="上传" type="button" onclick="Check()" /></td>
+                    </tr>
+                </table>
+
+
+            </div>*@
+        </form>
+        <table class="table table-hover table-striped">
+            <thead>
+                <tr>
+                    <th>序号</th>
+                    <th style="display:none">ID</th>
+                    <th>名称</th>
+                    <th>预览</th>
+                    <th>简历模板</th>
+                    <th>创建时间</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (var i = 0; i < Model.Count(); i++)
+                {
+                    <tr>
+                        <td>@(i + 1)</td>
+                        <td style="display:none">@Html.DisplayFor(modelItem => Model[i].ID, "") </td>
+                        <td><a href="#" onclick="QueryList(@Model[i].ID,@Model[i].tep)">@Html.DisplayFor(modelItem => Model[i].Name)</a> </td>
+                       
+                        @*<td><a href="#" onclick="QueryList1('@Truncate(Model[i].Path)')">预览</a> </td>*@
+                        <td><a href="~/file/html/@Truncate(Model[i].Path)" target="_blank">预览</a> </td>
+                        <td>@Html.DisplayFor(modelItem => Model[i].WordTep, "") </td>
+                        <td>@Html.DisplayFor(modelItem => Model[i].CreateTime) </td>
+                        <td>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default">更多操作</button>
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                    <span class="caret"></span>
+                                    <span class="sr-only"></span>
+                                </button>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li><a href="#" onclick="Del(@Model[i].ID)"> 删除</a></li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        @Ajax.Pager(Model, new Webdiyer.WebControls.Mvc.PagerOptions { PageIndexParameterName = "id", ShowPageIndexBox = false, PageIndexBoxType = Webdiyer.WebControls.Mvc.PageIndexBoxType.DropDownList, ShowGoButton = false }, new Webdiyer.WebControls.Mvc.MvcAjaxOptions { UpdateTargetId = "uploadfile" })
+
+        @helper Truncate(string input)
+{
+   int length=input.IndexOf('.');
+    if (input.Length <= length)
+    {
+        @input
+    }
+    else
+    {
+        @(input.Substring(0, length)+".html")
+    }
+}
+    </div>
+</div>
+<script>
+
+    var progressBar = dialog({
+        width: 200,
+        title: "上传中...",
+        cancel: false
+    });
+    $(function () {
+        $("#form1").ajaxForm({
+            dataType: "JSON",
+            error: function (data) {
+                progressBar.close();
+            },
+            beforeSend: function (request) {
+                progressBar.show();
+            },
+            success: function (data) {
+                progressBar.close();
+                if (data == "0") {
+                    showWarning("提示", "请选择文件", false, true);
+                    return false;
+                } else if (data == "1") {
+                    showWarning("提示", "文件格式不正确，请选择Word文件", false, true);
+                    return false;
+                } else if (data == "2") {
+                    showWarning("提示", "文件过大，请选择小于5M的文件！", false, true);
+                    return false;
+                } else {
+                    window.location.reload();
+                    showSucceed("提示", "添加成功", true, true);
+                }
+            }
+        });
+    })
+    function QueryList(id, tep) {
+        top.dialog({
+            id: 'dialog1',
+            title: '数据提取',
+            url: '/Words/Info?ID=' + id + "&Tep=" + tep,
+            padding: 5,
+            scroll: 'yes',
+            width: 1100,
+            height: 700,
+
+            cancel: true
+
+        }).showModal();
+
+
+    }
+    function QueryList1(ssss) {
+        top.dialog({
+            id: 'dialog1',
+            title: '数据提取',
+            url: '../file/html/'+ssss+'.html',
+            padding: 5,
+            scroll: 'yes',
+            width: 1500,
+            height: 700,
+            cancel: true
+        }).showModal();
+
+
+    }
+    function Del(id) {
+        showQuestion('提示', '确认删除吗？', true, function () {
+            $.ajax({
+                cache: false,
+                type: "POST",
+                url: '/Words/Delete?ID=' + id,
+                data: { ID: id },
+                async: false,
+                beforeSend: function (request) {
+
+                },
+                error: function (request) {
+                    showError("提示", "出现异常，请稍后再试！", false, false);
+
+                },
+                success: function (data) {
+
+
+                    if (data == "1") {
+                        var icon = "succeed";
+                        var html = '<table><tr><td><img src="/Images/icons/' + icon + '.png" /></td><td>删除成功！</td></tr></table>';
+                        var d = top.dialog({
+                            title: "提示",
+                            padding: 20,
+                            content: html,
+                            okValue: "确定",
+                            ok: function () {
+                                window.location.reload();
+                            }
+                        });
+                        d.show();
+                    }
+                    else {
+                        showError("提示", "删除失败，请稍后再试！", false, false);
+                    }
+                }
+            });
+        });
+
+
+    }
+    function Check() {
+        var r = true;
+        var val = $("#file").val();
+        var k = val.substr(val.indexOf("."));
+
+        if (val.length == 0) {
+            showWarning("提示", "您没有选择任何文件，请选择文件", false, true);
+            r = false;
+            return false;
+        }
+        if (k.indexOf('doc') < 0) {
+            showWarning("提示", "文件格式不正确，请选择Word文件", false, true);
+            r = false;
+            return false;
+        }
+
+        if (r) {
+            $("#btnHiddenOk").click();
+        }
+    }
+</script>

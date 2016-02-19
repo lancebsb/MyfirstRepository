@@ -1,0 +1,9 @@
+E:\搜才项目源码\Doc\Model\bin\Release\Model.dll.config
+E:\搜才项目源码\Doc\Model\bin\Release\Model.dll
+E:\搜才项目源码\Doc\Model\bin\Release\Model.pdb
+E:\搜才项目源码\Doc\Model\bin\Release\EntityFramework.dll
+E:\搜才项目源码\Doc\Model\bin\Release\EntityFramework.xml
+E:\搜才项目源码\Doc\Model\bin\Release\zh-Hans\EntityFramework.resources.dll
+E:\搜才项目源码\Doc\Model\obj\Release\Model.dll
+E:\搜才项目源码\Doc\Model\obj\Release\Model.pdb
+E:\搜才项目源码\Doc\Model\obj\Release\Model.csprojResolveAssemblyReference.cache

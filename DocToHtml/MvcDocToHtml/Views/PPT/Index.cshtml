@@ -1,0 +1,208 @@
+﻿@model Webdiyer.WebControls.Mvc.PagedList<Model.UploadFile1>
+@{
+    ViewBag.Title = "Index";
+}
+<link href="~/Scripts/dialog/css/ui-dialog.css" rel="stylesheet" />
+<script src="~/Scripts/dialog/dist/dialog-plus.js"></script>
+<script src="~/Scripts/jquery.form.js"></script>
+<style type="text/css">
+    input {
+        vertical-align: middle;
+        margin: 0;
+        padding: 0;
+    }
+    .file-box {
+        position: relative;
+        width: 340px;
+    }
+
+    .txt {
+        height: 30px;
+        border: 1px solid #cdcdcd;
+        width: 180px;
+    }
+
+    .file {
+        position: absolute;
+        top: 0;
+        right: 90px;
+        height: 30px;
+        filter: alpha(opacity:0);
+        opacity: 0;
+        width: 240px;
+    }
+</style>
+<div class="row">
+
+    <div class="col-md-3">
+        @Html.Partial("../Shared/_QuickMenu")
+    </div>
+    <div class="col-md-9 ">
+
+        <ol class="breadcrumb">
+            <li><a href="#">附件管理</a></li>
+            <li class="active">查看PPT列表</li>
+        </ol>
+        <form id="form1" method="post" action="/PPT/UpFile" enctype="multipart/form-data">
+            <div class="file-box">
+                <input type='text' name='textfield' id='textfield' class='txt' />
+                <input type="button" value="浏览..." class='btn btn-primary' style="height:30px" />
+                <input type="file" name="txtUpLoad" class="file" id="txtUpLoad" size="28" onchange="document.getElementById('textfield').value=this.value" />
+                <input type="button" class="btn btn-danger" id="btnOk" value="上传" style="height:30px" onclick="Check()" />
+                <input type="submit" id="btnHiddenOk" value="上传" style="display:none" />
+            </div>
+        </form>
+
+            <table class="table table-hover table-striped">
+                <thead>
+                    <tr>
+                        <th>序号</th>
+                        <th style="display:none">ID</th>
+                        <th>名称</th>
+                        <th style="display:none">路径</th>
+                        <th>页数</th>
+                        <th>上传时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (var i = 0; i < Model.Count(); i++)
+                    {
+                        <tr>
+                            <td>@(i + 1)</td>
+                            <td style="display:none">@Html.DisplayFor(modelItem => Model[i].ID, "") </td>
+                            <td><a href="#" onclick="ShowImg('@Model[i].Path', '@Model[i].ImgCount')">@Html.DisplayFor(modelItem => Model[i].Name)</a> </td>
+                            <td style="display:none">@Html.DisplayFor(modelItem => Model[i].Path)  </td>
+                            <td>@Html.DisplayFor(modelItem => Model[i].ImgCount)  </td>
+                            <td>@Html.DisplayFor(modelItem => Model[i].CreateTime)  </td>
+                            <td>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-default">更多操作</button>
+                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                        <span class="caret"></span>
+                                        <span class="sr-only"></span>
+                                    </button>
+                                    <ul class="dropdown-menu" role="menu">
+                                        <li><a href="#" onclick="ShowImg('@Model[i].Path','@Model[i].ImgCount')">查看</a></li>
+                                        <li><a href="#" onclick="DelPPT('@Model[i].Path','@Model[i].ID')">删除</a></li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+@Ajax.Pager(Model, new Webdiyer.WebControls.Mvc.PagerOptions { PageIndexParameterName = "id", ShowPageIndexBox = false, PageIndexBoxType = Webdiyer.WebControls.Mvc.PageIndexBoxType.DropDownList, ShowGoButton = false }, new Webdiyer.WebControls.Mvc.MvcAjaxOptions { UpdateTargetId = "articles" })
+</div>
+</div>
+<script>
+    var progressBar = dialog({
+        width:200,
+        title:"上传中...",
+        cancel: false
+    });
+    $(function () {
+        $("#form1").ajaxForm({
+            url: "/PPT/UpFile",
+            dataType: "JSON",
+            beforeSend: function (request) {
+                progressBar.show();
+            },
+            error:function(data){
+                progressBar.close();
+            },
+            success: function (data) {
+                progressBar.close();
+                if (data.msg == 0) {
+                    showWarning("提示", "请选择文件", true, true);
+                    return false;
+                } else if (data.msg == 1) {
+                    showWarning("提示", "文件大小不能超过4M！", false, true);
+                return false;
+                } else if (data.msg == -1) {
+                    showWarning("提示", "上传文件格式不正确！", false, true);
+                    return false;
+                } else {
+                    showSucceed("提示", "上传成功！", false, false);
+                    window.location.reload();
+                    return false;
+                }
+            }
+        });
+    })
+    // 删除
+    function DelPPT(path, id) {
+        showQuestion('提示', '确认删除吗？', true, function () {
+            $.ajax({
+                cache: false,
+                type: "POST",
+                url: '/PPT/DelPPT',
+                data: { id: id },
+                async: false,
+                beforeSend: function (request) {
+                },
+                error: function (request) {
+                    showError("提示", "出现异常，请稍后再试！", false, false);
+                },
+                success: function (data) {
+
+                    var result = eval('(' + data + ')');
+                    if (result.msg == 0) {
+                        var html = '<table><tr><td><img src="/Images/icons/succeed.png" /></td><td>删除成功！</td></tr></table>';
+                        var d = top.dialog({
+                            title: "提示",
+                            padding: 20,
+                            content: html,
+                            okValue: "确定",
+                            ok: function () {
+                                window.location.reload();
+                            }                   
+                        });
+                        d.showModal();
+                    }
+                    else {
+                        showError("提示", "删除失败，请稍后再试！", false, false);
+                    }
+                }
+            });
+        },
+         function () {  }
+        )
+    }
+    // 弹出窗口
+    function ShowImg(path,count) {
+        top.dialog({
+            id: 'dialog1',
+            title: '查看',
+            url: '/PPT/ShowImg',
+            padding: 1,
+            scroll: 'yes',
+            width: 800,
+            height: 550,
+            data: { imgPath: path, imgCount: count },
+            okValue: "关闭",
+            ok:true
+
+        }).showModal();
+    }
+    // 上传前验证文件
+    function Check() {
+        var r = true;
+        var val = $("#txtUpLoad").val();
+        var suffix = val.substr(val.indexOf("."));
+
+        if (val.length == 0) {
+            showWarning("提示", "您没有选择任何文件，请选择文件", false, true);
+            r = false;
+            return false;
+        }
+        if (suffix.indexOf('ppt') < 0) {
+            showWarning("提示", "文件格式不正确，请选择PPT文件", false, true);
+            r = false;
+            return false;
+        }
+        if (r) {
+            $("#btnHiddenOk").click();
+        }
+    }
+</script>

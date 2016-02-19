@@ -1,0 +1,62 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>ShowImg</title>
+    <link href="/Content/zzsc.css" rel="stylesheet" />
+    @*<link href="/Scripts/dialog/css/ui-dialog.css" rel="stylesheet" />*@
+    <script src="/Scripts/jquery-1.10.2.js"></script>
+    <script src="/Scripts/jquery-powerSwitch.js"></script>
+    <script src="/Scripts/dialog/dist/dialog-plus.js"></script>
+    <script>
+        //document.oncontextmenu = function () {
+        //    return false;
+        //}
+        $(function () {
+            var dialog = top.dialog.get(window);
+            var data = dialog.data; // 获取对话框传递过来的数据
+            var imgPath = data.imgPath;  //图片路径
+            var count = data.imgCount;
+            for (var i = 1; i <= parseInt(count) ; i++) {
+                if (i == 1) {
+                    $("#tabAutoTrigger").append("<li class=\"tab\"><a href=\"javascript:\" class=\"tab_a tab_on\" data-rel=\"tabAutoPlay" + i + "\">" + i + "</a></li>");
+                    $("#tabAutoShow").append("<li id=\"tabAutoPlay" + i + "\" class=\"tabpanel_abs\"><img src=\"" + imgPath + i + ".jpg\" /></li>");
+                }
+                //else if(i==40){
+                //    break;
+                //}
+                else {
+                    $("#tabAutoTrigger").append("<li class=\"tab\"><a href=\"javascript:\" class=\"tab_a\" data-rel=\"tabAutoPlay" + i + "\">" + i + "</a></li>");
+                    $("#tabAutoShow").append("<li id=\"tabAutoPlay" + i + "\" class=\"tabpanel_abs\" style=\"display:none;\"><img src=\"" + imgPath + i + ".jpg\" /></li>");
+                }
+            }
+
+            $("#tabAutoTrigger a").powerSwitch({
+                classAdd: "tab_on",
+                animation: "translate",
+                eventType: "hover",
+                autoTime: 3000,
+                container: $("#tabAutoOperate")
+            });
+        })
+    </script>
+
+</head>
+<body>
+    <br>
+    <div class="zxx_test_list_list">
+        <div class="tab_limit">
+            <div id="tabAutoOperate" class="tab_auto_play"></div>
+            <ul id="tabAutoTrigger" class="tablist" style="overflow:auto; height :60px;"></ul>
+            <ul id="tabAutoShow" class="tab_content tab_content_rel">
+
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
